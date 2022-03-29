@@ -13,6 +13,9 @@ I created this library because i don't like any of other command parsers i tryie
    
 I probably will be using this library from now. So i will be finding and fixing errors, improving the code, etc. It's going to get much better. 
 
+### LICENSE
+![licenseScreenshot](https://user-images.githubusercontent.com/56775178/160669799-586bed67-a9be-4897-ae31-9445c83d7963.png)
+
 ### How to install?
 
 ```bash

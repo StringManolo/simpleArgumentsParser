@@ -1,0 +1,27 @@
+{
+  "name": "simpleargumentsparser",
+  "version": "1.0.0",
+  "description": "Parse CLI arguments from node",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StringManolo/simpleArgumentsParser.git"
+  },
+  "keywords": [
+    "simple",
+    "cli",
+    "arguments",
+    "parser",
+    "node",
+    "args"
+  ],
+  "author": "stringmanolo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/StringManolo/simpleArgumentsParser/issues"
+  },
+  "homepage": "https://github.com/StringManolo/simpleArgumentsParser#readme"
+}

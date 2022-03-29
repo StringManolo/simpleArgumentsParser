@@ -32,10 +32,10 @@ const CLI = {
 ```
 
 - #### s   
-s holds single hyphen arguments like -v  
-s allow multiple arguments after a single hyphen like -lvk  
-If text dosn't follow, true is assigned  
-If text follows, takes it as value of argument  
+- s holds single hyphen arguments like -v  
+- s allow multiple arguments after a single hyphen like -lvk  
+- If text dosn't follow, true is assigned  
+- If text follows, takes it as value of argument  
 ```bash
 $ helloworld -n Manolo -vd
 ```

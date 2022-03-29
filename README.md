@@ -31,46 +31,56 @@ const CLI = {
 };
 ```
 
-- s  
+- s   
 s holds single hyphen arguments like -v  
 s allow multiple arguments after a single hyphen like -lvk  
 If text dosn't follow, true is assigned  
 If text follows, takes it as value of argument  
-Ex: $ helloworld -n Manolo -vd  
-s: { n: "Manolo", v: true, d: true }  
+```bash
+$ helloworld -n Manolo -vd
+```
+> s: { n: "Manolo", v: true, d: true }  
   
-- c
-c holds double guion arguments like --add  
+- c  
+c holds double guion arguments like --add    
 c allows guions between words like --add-new-number  
 If text doesn't follow, true is assigned  
 If text follows, takes it as value of argument  
-Ex: $ helloworld --name String --last-name Manolo --verbose  
-c: { name: "String", 'last-name': "Manolo", verbose: true }  
+```bash
+$ helloworld --name String --last-name Manolo --verbose  
+```
+> c: { name: "String", 'last-name': "Manolo", verbose: true }  
   
-- o
+- o  
 o holds other arguments (anything else found, except - and -- )  
 o Arguments are followed by a number indicating their position  
-Ex: $ helloworld hello how are you  
-o: [ [ "hello", 1 ], [ "how", 2 ], [ "are", 3 ], [ "you", 4 ] ]  
+```bash
+$ helloworld hello how are you
+```
+> o: [ [ "hello", 1 ], [ "how", 2 ], [ "are", 3 ], [ "you", 4 ] ]  
   
-- p
+- p  
 p holds pipped input data  
 You can use pipped and arguments together  
-Ex: $ echo "Hey!" | helloworld -n Manolo  
-p: "Hey!",  
-s: { n: 'Manolo' }  
+```bash
+$ echo "Hey!" | helloworld -n Manolo  
+```
+> p: "Hey!",  
+> s: { n: 'Manolo' }  
 
-- e
+- e  
 e holds errors and the some time used double hyphen end command  
 _Errors will be added in the future_  
-Ex: $ helloworld -v -- helloworld2 -v -- helloworld3 -v  
-e: [ 2, 5 ]  
+```bash
+$ helloworld -v -- helloworld2 -v -- helloworld3 -v  
+```
+> e: [ 2, 5 ]  
 
-- noArgs
-noArgs is just a boolean set to true if no arguments provided  
-If pipped is provided, noArgs will remain to false  
+- noArgs  
+noArgs is just a boolean set to true if no arguments provided   
+If pipped is provided, noArgs will remain to false   
 
-- argc
+- argc  
 argc counts the number of arguments  
 __argc doesn't count pipped as an argument__  
 

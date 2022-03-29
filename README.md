@@ -42,26 +42,26 @@ $ helloworld -n Manolo -vd
 > s: { n: "Manolo", v: true, d: true }  
   
 - #### c  
-c holds double guion arguments like --add    
-c allows guions between words like --add-new-number  
-If text doesn't follow, true is assigned  
-If text follows, takes it as value of argument  
+- c holds double guion arguments like --add    
+- c allows guions between words like --add-new-number  
+- If text doesn't follow, true is assigned  
+- If text follows, takes it as value of argument  
 ```bash
 $ helloworld --name String --last-name Manolo --verbose  
 ```
 > c: { name: "String", 'last-name': "Manolo", verbose: true }  
   
 - #### o  
-o holds other arguments (anything else found, except - and -- )  
-o Arguments are followed by a number indicating their position  
+- o holds other arguments (anything else found, except - and -- )  
+- o Arguments are followed by a number indicating their position  
 ```bash
 $ helloworld hello how are you
 ```
 > o: [ [ "hello", 1 ], [ "how", 2 ], [ "are", 3 ], [ "you", 4 ] ]  
   
 - #### p  
-p holds pipped input data  
-You can use pipped and arguments together  
+- p holds pipped input data  
+- You can use pipped and arguments together  
 ```bash
 $ echo "Hey!" | helloworld -n Manolo  
 ```
@@ -69,20 +69,20 @@ $ echo "Hey!" | helloworld -n Manolo
 > s: { n: 'Manolo' }  
 
 - #### e  
-e holds errors and the some time used double hyphen end command  
-_Errors will be added in the future_  
+- e holds errors and the some time used double hyphen end command  
+- _Errors will be added in the future_  
 ```bash
 $ helloworld -v -- helloworld2 -v -- helloworld3 -v  
 ```
 > e: [ 2, 5 ]  
 
 - #### noArgs  
-noArgs is just a boolean set to true if no arguments provided   
-If pipped is provided, noArgs will remain to false   
+- noArgs is just a boolean set to true if no arguments provided   
+- If pipped is provided, noArgs will remain to false   
 
 - #### argc  
-argc counts the number of arguments  
-__argc doesn't count pipped as an argument__  
+- argc counts the number of arguments  
+- __argc doesn't count pipped as an argument__  
 
 
 ```javascript

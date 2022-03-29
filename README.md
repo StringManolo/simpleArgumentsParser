@@ -37,10 +37,10 @@ const CLI = {
 - s allow multiple arguments after a single hyphen like -lvk  
 - If text dosn't follow, true is assigned  
 - If text follows, takes it as value of argument  
-```bash
+- ```bash
 $ helloworld -n Manolo -vd
 ```
-> s: { n: "Manolo", v: true, d: true }  
+- > s: { n: "Manolo", v: true, d: true }  
   
 - #### c  
 - c holds double guion arguments like --add    

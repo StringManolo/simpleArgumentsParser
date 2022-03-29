@@ -1,6 +1,6 @@
 {
   "name": "simpleargumentsparser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse CLI arguments from node",
   "main": "index.js",
   "scripts": {
@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/StringManolo/simpleArgumentsParser/issues"
   },
-  "homepage": "https://github.com/StringManolo/simpleArgumentsParser#readme"
+  "homepage": "https://github.com/StringManolo/simpleArgumentsParser#readme",
+  "dependencies": {
+    "simpleargumentsparser": "^1.0.1"
+  }
 }

@@ -6,7 +6,7 @@ A simple library to parse cli arguments. Perfect to make commands
 ### Why Use
 You can make your own even simplier parser adapted exactly to your code requeriments. But using this library, you can save a lot of time.  
   
-Writing custom parsers like i was doing for each command, takes a good amount of time. More even on simpier ones. Just better throw a npm install, a require await the parser and you ready to go.
+Writing custom parsers like i was doing for each command, takes a good amount of time. More even on simpler ones. Just better throw a npm install, a require await the parser and you ready to go.
 
 ### Why not other?
 I created this library because i don't like any of other command parsers i tryied. Some are to basic, others are to bug for a simple parsing, others just don't work well and other are to complicated.  
@@ -16,7 +16,7 @@ I probably will be using this library from now. So i will be finding and fixing 
 ### How to install?
 
 ```bash
-npm i THIS_PACKAGE_IS_NOT_YET_IN_NPM
+npm i simpleargumentsparser
 ```
 
 ### Basic usage
@@ -89,7 +89,7 @@ $ helloworld -v -- helloworld2 -v -- helloworld3 -v
 
 
 ```javascript
-const parseCLI = require("./index.js"); // TODO: Add npm name
+const parseCLI = require("simpleargumentsparser");
 
 (async() => {
   const cli = await parseCLI();

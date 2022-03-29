@@ -1,4 +1,4 @@
-const parseCLI = require("./index.js");
+const parseCLI = require("simpleargumentsparser");
 
 (async() => {
   const cli = await parseCLI();

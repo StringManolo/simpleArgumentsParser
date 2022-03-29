@@ -4,7 +4,8 @@
 A simple library to parse cli arguments. Perfect to make commands
 
 ### Why Use
-You can make your own even simplier parser adapted exactly to your code requeriments. But using this library, you can save a lot of time. Writing custom parsers like i was doing for each command, takes a good amount of time. More even on simpier ones. Just better throw a npm install, a require await the parser and you ready to go.
+You can make your own even simplier parser adapted exactly to your code requeriments. But using this library, you can save a lot of time.  
+Writing custom parsers like i was doing for each command, takes a good amount of time. More even on simpier ones. Just better throw a npm install, a require await the parser and you ready to go.
 
 ### Why not other?
 I created this library because i don't like any of other command parsers i tryied. Some are to basic, others are to bug for a simple parsing, others just don't work well and other are to complicated.  

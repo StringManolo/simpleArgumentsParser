@@ -149,4 +149,5 @@ const parseCLI = async () => {
   return Object.freeze(CLI);
 }
 
-module.exports = parseCLI;
+module.exports = parseCLI; // node require export
+export default parseCLI; // typescript export

@@ -135,4 +135,5 @@ const parseCLI = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     return Object.freeze(CLI);
 });
-module.exports = parseCLI;
+module.exports = parseCLI; // node require export
+exports.default = parseCLI; // typescript export

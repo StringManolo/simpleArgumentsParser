@@ -1,7 +1,7 @@
 # simpleArgumentsParser
 
 ### What
-A simple library to parse cli arguments. Perfect to make commands
+A simple typescript/javascript library to parse cli arguments. Perfect to make commands
 
 ### Why Use
 You can make your own even simplier parser adapted exactly to your code requeriments. But using this library, you can save a lot of time.  
@@ -91,6 +91,9 @@ $ helloworld -v -- helloworld2 -v -- helloworld3 -v
 - __argc doesn't count pipped as an argument__  
 
 
+### Examples
+
+##### Javascript Example
 ```javascript
 const parseCLI = require("simpleargumentsparser");
 
@@ -114,4 +117,81 @@ const exit = msg => {
 }
 ```
 
+##### Typescript Example
+```typescript
+// @ts-shebang
+import parseCLI from "simpleargumentsparser";
 
+import * as fs from "fs";
+// Load a file as utf-8 encoding 
+const loadFile = (filename: string): string | null => {
+  let retValue: string | null;
+  try {
+    retValue = fs.readFileSync(filename, { encoding: "utf-8" })
+  } catch(e) {
+    retValue = null;
+  }
+  return retValue ? retValue.substring(0, retValue.length-1) : null;
+}
+
+
+const usage = `Usage: base64 [-d] [FILE]
+
+Base64 encode or decode FILE to standard output
+
+-d      Decode data
+`;
+
+(async() => {
+  const cli = await parseCLI();
+
+  if (!cli.argc) {
+    // Encode cli.p
+    if (cli.p) {
+      const encoded = Buffer.from(cli.p).toString("base64");
+      console.log(encoded);
+    } else {
+    // if not pipped input, show usage
+      console.log("base64: no input to process");
+      console.log(usage);
+    }
+  } else if (cli.argc === 1 && cli.s?.d) {
+    // Decode cli.p
+    const decoded = Buffer.from(cli.p as string, "base64").toString("ascii");
+    console.log(decoded);
+  } else if (cli.argc === 2 && cli.s?.d) {
+    // Decode from file even if pipped input
+    if (cli.s.d !== true) {
+      const fileContent = loadFile(cli.s.d);
+      if (fileContent) {
+        const decoded = Buffer.from(fileContent, "base64").toString("ascii");
+	// TODO: check if content can be decoded
+	console.log(decoded);
+      } else {
+        console.log(`base64: ${cli.s.d}: No such file or directory`);
+      }
+    } else {
+      const fileContent = loadFile(cli.o?.[0]?.[0]);
+      if (fileContent) {
+        const decoded = Buffer.from(fileContent, "base64").toString("ascii");
+        // TODO: check if content can be decoded
+        console.log(decoded);
+      } else {
+        console.log(`base64: ${cli.o?.[0]?.[0]}: No such file or directory`);
+      }
+    }
+  } else if (cli.argc === 1) {
+    const fileContent = loadFile(cli.o?.[0]?.[0]);
+    if (fileContent) {
+      const encoded = Buffer.from(fileContent).toString("base64");
+      console.log(encoded);
+    } else {
+      console.log(`base64: ${cli.o?.[0]?.[0]}: No such file or directory`);
+    }
+  } else {
+    console.log("base64: unrecognized arguments");
+    console.log(usage);
+  }
+
+})();
+```

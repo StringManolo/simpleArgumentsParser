@@ -1,0 +1,313 @@
+#!/bin/bash
+# parseCLI - CLI Parser en Bash
+
+# ============================================
+# VARIABLES INTERNAS
+# ============================================
+
+declare -gA __CLI_S        # single args (-v)
+declare -gA __CLI_C        # couple args (--verbose)
+declare -gA __CLI_O        # other args con índice
+declare -g __CLI_P=""      # pipped input
+declare -ga __CLI_E        # end separator indices
+declare -g __CLI_NO_ARGS=false
+declare -g __CLI_ARGC=0
+declare -g __CLI_HAS_PIPE=false
+
+# ============================================
+# FUNCIONES INTERNAS
+# ============================================
+
+__get_piped_input() {
+    if [[ ! -t 0 ]]; then
+        local lines=""
+        local line
+        local lines_counter=0
+        
+        while IFS= read -r line; do
+            lines+="$line"$'\n'
+            ((lines_counter++))
+        done
+        
+        # Eliminar el último newline si existe
+        if [[ $lines_counter -gt 0 && "${lines: -1}" == $'\n' ]]; then
+            lines="${lines::-1}"
+        fi
+        
+        echo "$lines"
+        return 0
+    else
+        return 1
+    fi
+}
+
+__is_valid_short_arg() {
+    [[ "$1" =~ ^[a-zA-Z]+$ ]]
+}
+
+__is_valid_long_arg() {
+    [[ "$1" =~ ^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$ ]]
+}
+
+# ============================================
+# FUNCIÓN PRINCIPAL - parse_cli
+# ============================================
+
+parse_cli() {
+    # Reinicializar todas las variables
+    __CLI_S=()
+    __CLI_C=()
+    __CLI_O=()
+    __CLI_P=""
+    __CLI_E=()
+    __CLI_NO_ARGS=false
+    __CLI_ARGC=$#
+    __CLI_HAS_PIPE=false
+    
+    # Obtener entrada por tubería
+    if PIPED_INPUT=$(__get_piped_input 2>/dev/null); then
+        __CLI_P="$PIPED_INPUT"
+        __CLI_HAS_PIPE=true
+    fi
+    
+    # Convertir argumentos a array para procesar
+    local args=("$@")
+    local args_length=$#
+    
+    # Verificar si no hay argumentos ni entrada por tubería
+    if [[ $args_length -eq 0 ]] && [[ -z "$__CLI_P" ]]; then
+        __CLI_NO_ARGS=true
+    fi
+    
+    # Procesar cada argumento
+    local previous_is_arg=false
+    
+    for ((i=0; i<args_length; i++)); do
+        local current="${args[$i]}"
+        
+        # Si el argumento anterior consumió este, saltarlo
+        if $previous_is_arg; then
+            previous_is_arg=false
+            continue
+        fi
+        
+        local next=""
+        if (( i+1 < args_length )); then
+            next="${args[$i+1]}"
+        fi
+        
+        # Obtener primeros caracteres
+        local first_char="${current:0:1}"
+        
+        if [[ "$first_char" == "-" ]]; then
+            if [[ "${current:1:1}" == "-" ]]; then
+                # Argumentos largos (--)
+                if [[ ${#current} -gt 2 ]]; then
+                    local arg_name="${current:2}"
+                    
+                    if __is_valid_long_arg "$arg_name"; then
+                        if [[ -n "$next" && "${next:0:1}" != "-" ]]; then
+                            # Tiene valor asociado
+                            __CLI_C["$arg_name"]="$next"
+                            previous_is_arg=true
+                        else
+                            # Es booleano (true)
+                            __CLI_C["$arg_name"]="true"
+                        fi
+                    else
+                        # No válido, ir a otros
+                        __CLI_O["$((i+1))"]="$current"
+                    fi
+                else
+                    # Separador '--' encontrado
+                    __CLI_E+=("$((i+1))")
+                fi
+            else
+                # Argumentos cortos (-)
+                if [[ ${#current} -gt 1 ]]; then
+                    local arg_name="${current:1}"
+                    
+                    if __is_valid_short_arg "$arg_name"; then
+                        if [[ ${#arg_name} -gt 1 ]]; then
+                            # Parsear como grupo de flags booleanos (-abc)
+                            for ((j=0; j<${#arg_name}; j++)); do
+                                local single_arg="${arg_name:$j:1}"
+                                __CLI_S["$single_arg"]="true"
+                            done
+                        else
+                            # Argumento corto simple (-a)
+                            if [[ -n "$next" && "${next:0:1}" != "-" ]]; then
+                                # Tiene valor asociado
+                                __CLI_S["$arg_name"]="$next"
+                                previous_is_arg=true
+                            else
+                                # Es booleano (true)
+                                __CLI_S["$arg_name"]="true"
+                            fi
+                        fi
+                    else
+                        # No válido, ir a otros
+                        __CLI_O["$((i+1))"]="$current"
+                    fi
+                else
+                    # Solo '-' encontrado
+                    __CLI_O["$((i+1))"]="$current"
+                fi
+            fi
+        else
+            # Argumento posicional (no comienza con -)
+            __CLI_O["$((i+1))"]="$current"
+        fi
+    done
+    
+    # Exportar la función cli
+    __export_cli_function
+}
+
+# ============================================
+# FUNCIÓN CLI - CON SOPORTE PARA cli p found
+# ============================================
+
+__export_cli_function() {
+    # Función principal 'cli'
+    cli() {
+        case "$1" in
+            noArgs)
+                if $__CLI_NO_ARGS; then
+                    return 0
+                else
+                    return 1
+                fi
+                ;;
+            s)
+                if [[ $# -eq 2 ]]; then
+                    local key="$2"
+                    if [[ -n "${__CLI_S[$key]}" ]]; then
+                        return 0
+                    else
+                        return 1
+                    fi
+                else
+                    echo "Uso: cli s <key>" >&2
+                    return 1
+                fi
+                ;;
+            c)
+                if [[ $# -eq 2 ]]; then
+                    local key="$2"
+                    if [[ -n "${__CLI_C[$key]}" ]]; then
+                        return 0
+                    else
+                        return 1
+                    fi
+                else
+                    echo "Uso: cli c <key>" >&2
+                    return 1
+                fi
+                ;;
+            o)
+                local sorted_indices=($(printf '%s\n' "${!__CLI_O[@]}" | sort -n))
+                for idx in "${sorted_indices[@]}"; do
+                    echo "${__CLI_O[$idx]}"
+                done
+                ;;
+            e)
+                echo "${__CLI_E[@]}"
+                ;;
+            p)
+                # cli p - muestra el contenido
+                # cli p found - verifica si hay pipe sin imprimir
+                if [[ $# -eq 1 ]]; then
+                    # Modo: obtener valor
+                    echo "$__CLI_P"
+                elif [[ $# -eq 2 && "$2" == "found" ]]; then
+                    # Modo: verificar existencia
+                    if $__CLI_HAS_PIPE; then
+                        return 0
+                    else
+                        return 1
+                    fi
+                else
+                    echo "Uso: cli p [found]" >&2
+                    return 1
+                fi
+                ;;
+            argc)
+                echo "$__CLI_ARGC"
+                ;;
+            print)
+                echo "{"
+                echo "  \"s\": {"
+                local first=true
+                for key in "${!__CLI_S[@]}"; do
+                    if ! $first; then echo ","; fi
+                    first=false
+                    local value="${__CLI_S[$key]}"
+                    if [[ "$value" == "true" || "$value" == "false" ]]; then
+                        echo -n "    \"$key\": $value"
+                    else
+                        value=$(echo "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+                        echo -n "    \"$key\": \"$value\""
+                    fi
+                done
+                echo -e "\n  },"
+                
+                echo "  \"c\": {"
+                first=true
+                for key in "${!__CLI_C[@]}"; do
+                    if ! $first; then echo ","; fi
+                    first=false
+                    local value="${__CLI_C[$key]}"
+                    if [[ "$value" == "true" || "$value" == "false" ]]; then
+                        echo -n "    \"$key\": $value"
+                    else
+                        value=$(echo "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+                        echo -n "    \"$key\": \"$value\""
+                    fi
+                done
+                echo -e "\n  },"
+                
+                echo "  \"o\": ["
+                local sorted_indices=($(printf '%s\n' "${!__CLI_O[@]}" | sort -n))
+                first=true
+                for idx in "${sorted_indices[@]}"; do
+                    if ! $first; then echo ","; fi
+                    first=false
+                    local value="${__CLI_O[$idx]}"
+                    value=$(echo "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+                    echo -n "    [\"$value\", $idx]"
+                done
+                echo -e "\n  ],"
+                
+                echo -n "  \"p\": "
+                if $__CLI_HAS_PIPE; then
+                    local escaped_p="$__CLI_P"
+                    escaped_p=$(echo "$escaped_p" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\n/\\n/g; s/\t/\\t/g')
+                    echo "\"$escaped_p\","
+                else
+                    echo "false,"
+                fi
+                
+                echo "  \"e\": [${__CLI_E[*]}],"
+                echo "  \"noArgs\": $__CLI_NO_ARGS,"
+                echo "  \"argc\": $__CLI_ARGC"
+                echo "}"
+                ;;
+            *)
+                echo "Uso: cli <noArgs|s|c|o|e|p|argc|print> [args...]" >&2
+                return 1
+                ;;
+        esac
+    }
+    
+    export -f cli
+}
+
+# ============================================
+# EJECUCIÓN DIRECTA
+# ============================================
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    parse_cli "$@"
+    cli print
+fi

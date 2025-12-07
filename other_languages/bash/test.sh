@@ -1,5 +1,5 @@
 source ./parseCLI
 
-parse_cli
-get
+parse_cli "$@"
 
+cli print

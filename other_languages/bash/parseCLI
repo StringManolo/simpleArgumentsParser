@@ -1,5 +1,5 @@
 #!/bin/bash
-# parseCLI - CLI Parser en Bash
+# parseCLI - CLI Parser en Bash con colores
 
 # ============================================
 # VARIABLES INTERNAS
@@ -15,6 +15,47 @@ declare -g __CLI_ARGC=0
 declare -g __CLI_HAS_PIPE=false
 
 # ============================================
+# CÓDIGOS DE COLOR Y ESTILO
+# ============================================
+
+# Secuencias de escape ANSI
+declare -g __CLI_RESET="\033[0m"
+declare -g __CLI_BOLD="\033[1m"
+declare -g __CLI_DIM="\033[2m"
+declare -g __CLI_ITALIC="\033[3m"
+declare -g __CLI_UNDERLINE="\033[4m"
+declare -g __CLI_BLINK="\033[5m"
+declare -g __CLI_INVERT="\033[7m"
+
+# Colores de texto
+declare -g __CLI_BLACK="\033[30m"
+declare -g __CLI_RED="\033[31m"
+declare -g __CLI_GREEN="\033[32m"
+declare -g __CLI_YELLOW="\033[33m"
+declare -g __CLI_BLUE="\033[34m"
+declare -g __CLI_MAGENTA="\033[35m"
+declare -g __CLI_CYAN="\033[36m"
+declare -g __CLI_WHITE="\033[37m"
+declare -g __CLI_BRIGHT_BLACK="\033[90m"
+declare -g __CLI_BRIGHT_RED="\033[91m"
+declare -g __CLI_BRIGHT_GREEN="\033[92m"
+declare -g __CLI_BRIGHT_YELLOW="\033[93m"
+declare -g __CLI_BRIGHT_BLUE="\033[94m"
+declare -g __CLI_BRIGHT_MAGENTA="\033[95m"
+declare -g __CLI_BRIGHT_CYAN="\033[96m"
+declare -g __CLI_BRIGHT_WHITE="\033[97m"
+
+# Colores de fondo
+declare -g __CLI_BG_BLACK="\033[40m"
+declare -g __CLI_BG_RED="\033[41m"
+declare -g __CLI_BG_GREEN="\033[42m"
+declare -g __CLI_BG_YELLOW="\033[43m"
+declare -g __CLI_BG_BLUE="\033[44m"
+declare -g __CLI_BG_MAGENTA="\033[45m"
+declare -g __CLI_BG_CYAN="\033[46m"
+declare -g __CLI_BG_WHITE="\033[47m"
+
+# ============================================
 # FUNCIONES INTERNAS
 # ============================================
 
@@ -23,17 +64,17 @@ __get_piped_input() {
         local lines=""
         local line
         local lines_counter=0
-        
+
         while IFS= read -r line; do
             lines+="$line"$'\n'
             ((lines_counter++))
         done
-        
+
         # Eliminar el último newline si existe
         if [[ $lines_counter -gt 0 && "${lines: -1}" == $'\n' ]]; then
             lines="${lines::-1}"
         fi
-        
+
         echo "$lines"
         return 0
     else
@@ -63,48 +104,48 @@ parse_cli() {
     __CLI_NO_ARGS=false
     __CLI_ARGC=$#
     __CLI_HAS_PIPE=false
-    
+
     # Obtener entrada por tubería
     if PIPED_INPUT=$(__get_piped_input 2>/dev/null); then
         __CLI_P="$PIPED_INPUT"
         __CLI_HAS_PIPE=true
     fi
-    
+
     # Convertir argumentos a array para procesar
     local args=("$@")
     local args_length=$#
-    
+
     # Verificar si no hay argumentos ni entrada por tubería
     if [[ $args_length -eq 0 ]] && [[ -z "$__CLI_P" ]]; then
         __CLI_NO_ARGS=true
     fi
-    
+
     # Procesar cada argumento
     local previous_is_arg=false
-    
+
     for ((i=0; i<args_length; i++)); do
         local current="${args[$i]}"
-        
+
         # Si el argumento anterior consumió este, saltarlo
         if $previous_is_arg; then
             previous_is_arg=false
             continue
         fi
-        
+
         local next=""
         if (( i+1 < args_length )); then
             next="${args[$i+1]}"
         fi
-        
+
         # Obtener primeros caracteres
         local first_char="${current:0:1}"
-        
+
         if [[ "$first_char" == "-" ]]; then
             if [[ "${current:1:1}" == "-" ]]; then
                 # Argumentos largos (--)
                 if [[ ${#current} -gt 2 ]]; then
                     local arg_name="${current:2}"
-                    
+
                     if __is_valid_long_arg "$arg_name"; then
                         if [[ -n "$next" && "${next:0:1}" != "-" ]]; then
                             # Tiene valor asociado
@@ -126,7 +167,7 @@ parse_cli() {
                 # Argumentos cortos (-)
                 if [[ ${#current} -gt 1 ]]; then
                     local arg_name="${current:1}"
-                    
+
                     if __is_valid_short_arg "$arg_name"; then
                         if [[ ${#arg_name} -gt 1 ]]; then
                             # Parsear como grupo de flags booleanos (-abc)
@@ -159,13 +200,13 @@ parse_cli() {
             __CLI_O["$((i+1))"]="$current"
         fi
     done
-    
+
     # Exportar la función cli
     __export_cli_function
 }
 
 # ============================================
-# FUNCIÓN CLI - CON SOPORTE PARA cli p found
+# FUNCIÓN CLI - CON SOPORTE PARA COLORES
 # ============================================
 
 __export_cli_function() {
@@ -235,6 +276,110 @@ __export_cli_function() {
             argc)
                 echo "$__CLI_ARGC"
                 ;;
+            color)
+                # cli color <color> <texto>
+                # cli color <estilo> <color> <texto>
+                # cli color <estilo> <color> <bg-color> <texto>
+                
+                if [[ $# -lt 3 ]]; then
+                    echo "Uso: cli color <color> <texto>" >&2
+                    echo "     cli color <estilo> <color> <texto>" >&2
+                    echo "     cli color <estilo> <color> <bg-color> <texto>" >&2
+                    echo ""
+                    echo "Estilos disponibles: bold, dim, italic, underline, blink, invert"
+                    echo "Colores disponibles: black, red, green, yellow, blue, magenta, cyan, white"
+                    echo "                    bright_black, bright_red, bright_green, bright_yellow"
+                    echo "                    bright_blue, bright_magenta, bright_cyan, bright_white"
+                    echo "Colores de fondo:   bg_black, bg_red, bg_green, bg_yellow, bg_blue"
+                    echo "                    bg_magenta, bg_cyan, bg_white"
+                    return 1
+                fi
+                
+                local style=""
+                local color=""
+                local bg_color=""
+                local text=""
+                
+                # Detectar si el primer argumento es un estilo
+                case "$2" in
+                    bold|dim|italic|underline|blink|invert)
+                        style="$2"
+                        shift 2
+                        ;;
+                    *)
+                        shift 1
+                        ;;
+                esac
+                
+                # El siguiente argumento es el color
+                if [[ $# -ge 2 ]]; then
+                    color="$1"
+                    shift
+                    
+                    # Verificar si el siguiente es color de fondo
+                    case "$1" in
+                        bg_*)
+                            bg_color="$1"
+                            shift
+                            ;;
+                    esac
+                    
+                    # El resto es el texto
+                    text="$*"
+                else
+                    echo "Error: color no especificado" >&2
+                    return 1
+                fi
+                
+                # Construir secuencia de escape
+                local escape_seq=""
+                
+                # Añadir estilo
+                case "$style" in
+                    bold) escape_seq+="$__CLI_BOLD" ;;
+                    dim) escape_seq+="$__CLI_DIM" ;;
+                    italic) escape_seq+="$__CLI_ITALIC" ;;
+                    underline) escape_seq+="$__CLI_UNDERLINE" ;;
+                    blink) escape_seq+="$__CLI_BLINK" ;;
+                    invert) escape_seq+="$__CLI_INVERT" ;;
+                esac
+                
+                # Añadir color de texto
+                case "$color" in
+                    black) escape_seq+="$__CLI_BLACK" ;;
+                    red) escape_seq+="$__CLI_RED" ;;
+                    green) escape_seq+="$__CLI_GREEN" ;;
+                    yellow) escape_seq+="$__CLI_YELLOW" ;;
+                    blue) escape_seq+="$__CLI_BLUE" ;;
+                    magenta) escape_seq+="$__CLI_MAGENTA" ;;
+                    cyan) escape_seq+="$__CLI_CYAN" ;;
+                    white) escape_seq+="$__CLI_WHITE" ;;
+                    bright_black) escape_seq+="$__CLI_BRIGHT_BLACK" ;;
+                    bright_red) escape_seq+="$__CLI_BRIGHT_RED" ;;
+                    bright_green) escape_seq+="$__CLI_BRIGHT_GREEN" ;;
+                    bright_yellow) escape_seq+="$__CLI_BRIGHT_YELLOW" ;;
+                    bright_blue) escape_seq+="$__CLI_BRIGHT_BLUE" ;;
+                    bright_magenta) escape_seq+="$__CLI_BRIGHT_MAGENTA" ;;
+                    bright_cyan) escape_seq+="$__CLI_BRIGHT_CYAN" ;;
+                    bright_white) escape_seq+="$__CLI_BRIGHT_WHITE" ;;
+                    *) escape_seq+="$__CLI_WHITE" ;; # default
+                esac
+                
+                # Añadir color de fondo si se especificó
+                case "$bg_color" in
+                    bg_black) escape_seq+="$__CLI_BG_BLACK" ;;
+                    bg_red) escape_seq+="$__CLI_BG_RED" ;;
+                    bg_green) escape_seq+="$__CLI_BG_GREEN" ;;
+                    bg_yellow) escape_seq+="$__CLI_BG_YELLOW" ;;
+                    bg_blue) escape_seq+="$__CLI_BG_BLUE" ;;
+                    bg_magenta) escape_seq+="$__CLI_BG_MAGENTA" ;;
+                    bg_cyan) escape_seq+="$__CLI_BG_CYAN" ;;
+                    bg_white) escape_seq+="$__CLI_BG_WHITE" ;;
+                esac
+                
+                # Imprimir texto con color y resetear
+                echo -e "${escape_seq}${text}${__CLI_RESET}"
+                ;;
             print)
                 echo "{"
                 echo "  \"s\": {"
@@ -251,7 +396,7 @@ __export_cli_function() {
                     fi
                 done
                 echo -e "\n  },"
-                
+
                 echo "  \"c\": {"
                 first=true
                 for key in "${!__CLI_C[@]}"; do
@@ -266,7 +411,7 @@ __export_cli_function() {
                     fi
                 done
                 echo -e "\n  },"
-                
+
                 echo "  \"o\": ["
                 local sorted_indices=($(printf '%s\n' "${!__CLI_O[@]}" | sort -n))
                 first=true
@@ -278,7 +423,7 @@ __export_cli_function() {
                     echo -n "    [\"$value\", $idx]"
                 done
                 echo -e "\n  ],"
-                
+
                 echo -n "  \"p\": "
                 if $__CLI_HAS_PIPE; then
                     local escaped_p="$__CLI_P"
@@ -287,19 +432,19 @@ __export_cli_function() {
                 else
                     echo "false,"
                 fi
-                
+
                 echo "  \"e\": [${__CLI_E[*]}],"
                 echo "  \"noArgs\": $__CLI_NO_ARGS,"
                 echo "  \"argc\": $__CLI_ARGC"
                 echo "}"
                 ;;
             *)
-                echo "Uso: cli <noArgs|s|c|o|e|p|argc|print> [args...]" >&2
+                echo "Uso: cli <noArgs|s|c|o|e|p|argc|color|print> [args...]" >&2
                 return 1
                 ;;
         esac
     }
-    
+
     export -f cli
 }
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # parseCLI - CLI Parser en Bash con colores
 
 # ============================================
@@ -454,5 +454,5 @@ __export_cli_function() {
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     parse_cli "$@"
-    cli print
+    # cli print
 fi

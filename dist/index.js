@@ -13,6 +13,97 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const readline_1 = __importDefault(require("readline"));
+// Secuencias de escape ANSI
+const ANSI = {
+    RESET: '\x1b[0m',
+    BOLD: '\x1b[1m',
+    DIM: '\x1b[2m',
+    ITALIC: '\x1b[3m',
+    UNDERLINE: '\x1b[4m',
+    BLINK: '\x1b[5m',
+    INVERT: '\x1b[7m',
+    // Colores de texto
+    BLACK: '\x1b[30m',
+    RED: '\x1b[31m',
+    GREEN: '\x1b[32m',
+    YELLOW: '\x1b[33m',
+    BLUE: '\x1b[34m',
+    MAGENTA: '\x1b[35m',
+    CYAN: '\x1b[36m',
+    WHITE: '\x1b[37m',
+    BRIGHT_BLACK: '\x1b[90m',
+    BRIGHT_RED: '\x1b[91m',
+    BRIGHT_GREEN: '\x1b[92m',
+    BRIGHT_YELLOW: '\x1b[93m',
+    BRIGHT_BLUE: '\x1b[94m',
+    BRIGHT_MAGENTA: '\x1b[95m',
+    BRIGHT_CYAN: '\x1b[96m',
+    BRIGHT_WHITE: '\x1b[97m',
+    // Colores de fondo
+    BG_BLACK: '\x1b[40m',
+    BG_RED: '\x1b[41m',
+    BG_GREEN: '\x1b[42m',
+    BG_YELLOW: '\x1b[43m',
+    BG_BLUE: '\x1b[44m',
+    BG_MAGENTA: '\x1b[45m',
+    BG_CYAN: '\x1b[46m',
+    BG_WHITE: '\x1b[47m'
+};
+// Sistema de colores con encadenamiento
+const createStyleProxy = (accumulatedCodes = []) => {
+    const handler = {
+        get(target, prop) {
+            const upperProp = prop.toUpperCase();
+            // Manejar bright* como BRIGHT_*
+            let ansiKey = upperProp;
+            if (prop.startsWith('bright') && prop.length > 6) {
+                const colorName = prop.slice(6).toUpperCase();
+                ansiKey = `BRIGHT_${colorName}`;
+            }
+            // Manejar bg* como BG_*
+            if (prop.startsWith('bg') && prop.length > 2) {
+                const colorName = prop.slice(2).toUpperCase();
+                ansiKey = `BG_${colorName}`;
+            }
+            if (ANSI[ansiKey]) {
+                return createStyleProxy([...accumulatedCodes, ANSI[ansiKey]]);
+            }
+            if (typeof target === 'function') {
+                return target;
+            }
+            return createStyleProxy(accumulatedCodes);
+        },
+        apply(target, thisArg, args) {
+            const text = args[0];
+            return accumulatedCodes.join('') + text + ANSI.RESET;
+        }
+    };
+    const fn = function (text) {
+        return accumulatedCodes.join('') + text + ANSI.RESET;
+    };
+    return new Proxy(fn, handler);
+};
+// Objeto principal color
+const color = new Proxy({}, {
+    get(target, prop) {
+        const upperProp = prop.toUpperCase();
+        // Manejar bright* como BRIGHT_*
+        let ansiKey = upperProp;
+        if (prop.startsWith('bright') && prop.length > 6) {
+            const colorName = prop.slice(6).toUpperCase();
+            ansiKey = `BRIGHT_${colorName}`;
+        }
+        // Manejar bg* como BG_*
+        if (prop.startsWith('bg') && prop.length > 2) {
+            const colorName = prop.slice(2).toUpperCase();
+            ansiKey = `BG_${colorName}`;
+        }
+        if (ANSI[ansiKey]) {
+            return createStyleProxy([ANSI[ansiKey]]);
+        }
+        return createStyleProxy([]);
+    }
+});
 const CLI = {
     s: {},
     c: {},
@@ -20,7 +111,8 @@ const CLI = {
     p: false,
     e: [],
     noArgs: false,
-    argc: process.argv.length - 2
+    argc: process.argv.length - 2,
+    color: color
 };
 const getPippedInput = () => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
@@ -116,11 +208,11 @@ const parseCLI = () => __awaiter(void 0, void 0, void 0, function* () {
                                 return;
                             }
                             else {
-                                //console.log(`WHAT IS THIS??? (${current})`);
+                                //console.log`WHAT IS THIS??? (${current})`);
                             }
                         }
                         else {
-                            //console.log(`WHAT IS THIS2??? (${current})`);
+                            //console.log`WHAT IS THIS2??? (${current})`);
                             // is not -word && not --word
                         }
                 }

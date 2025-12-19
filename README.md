@@ -1,8 +1,9 @@
 # simpleArgumentsParser
 
-> A lightweight, powerful CLI argument parser for Node.js and Bash with built-in ANSI color support
+> A lightweight, powerful CLI argument parser for Node.js, Bash, and Rust with built-in ANSI color support
 
 [![npm version](https://img.shields.io/npm/v/simpleargumentsparser.svg)](https://www.npmjs.com/package/simpleargumentsparser)
+[![crates.io](https://img.shields.io/crates/v/simpleargumentsparser.svg)](https://crates.io/crates/simpleargumentsparser)
 [![License: GPLV3](https://img.shields.io/badge/License-GPLV3-yellow.svg)](https://opensource.org/licenses/GPLV3)
 
 ---
@@ -18,6 +19,7 @@
   - [Color System](#color-system)
 - [Examples](#examples)
 - [Bash Version](#bash-version)
+- [Rust Version](#rust-version)
 - [License](#license)
 
 ---
@@ -31,7 +33,7 @@
 - **🚀 Fast & Lightweight** - Zero dependencies, minimal overhead
 - **🎨 Built-in Colors** - ANSI color system with chainable styles
 - **🔄 Pipe Support** - Handle piped input seamlessly
-- **📦 Multi-Language** - Available for Node.js (JS/TS) and Bash
+- **📦 Multi-Language** - Available for Node.js (JS/TS), Rust, and Bash
 - **🎯 Simple API** - Intuitive syntax, minimal learning curve
 - **⚡ TypeScript Ready** - Full TypeScript support with type definitions
 
@@ -52,7 +54,7 @@
 - 8 standard colors + 8 bright variants
 - Background colors
 - Chainable style combinations
-- Works in both Node.js and Bash
+- Works in Node.js, Rust, and Bash
 
 ---
 
@@ -64,12 +66,20 @@
 npm install simpleargumentsparser
 ```
 
+### Rust
+
+```toml
+# In your Cargo.toml
+[dependencies]
+simpleargumentsparser = "2.1.0"
+```
+
 ### Bash
 
 ```bash
 git clone https://github.com/stringmanolo/simpleargumentsparser
 cd simpleargumentsparser/other_languages/bash
-# You can also use npm 
+# You can also use npm
 ```
 
 ---
@@ -83,7 +93,7 @@ const parseCLI = require("simpleargumentsparser");
 
 (async () => {
   const cli = await parseCLI();
-  
+
   if (cli.s.h || cli.c.help) {
     console.log(`${cli.color.bold.cyan("My CLI Tool")} - v1.0.0`);
     console.log(`${cli.color.green("✓")} Ready to use!`);
@@ -98,11 +108,31 @@ import parseCLI from "simpleargumentsparser";
 
 (async () => {
   const cli = await parseCLI();
-  
+
   if (cli.noArgs) {
     console.log(cli.color.yellow("No arguments provided"));
   }
 })();
+```
+
+### Rust
+
+```rust
+use simpleargumentsparser::parse_cli;
+use std::process;
+
+fn main() {
+    let cli = parse_cli();
+
+    if cli.s.contains_key("h") || cli.c.contains_key("help") {
+        exit("Help Menu:\n\nThis is just an example");
+    }
+}
+
+fn exit(msg: &str) {
+    println!("{}", msg);
+    process::exit(0);
+}
 ```
 
 ### Bash
@@ -131,7 +161,7 @@ The parser returns an object with the following properties:
   c: {},        // Double-dash arguments (--verbose, --help)
   o: [],        // Positional arguments with position tracking
   p: false,     // Piped input (string or false)
-  e: [],        // Separator positions (--) 
+  e: [],        // Separator positions (--)
   noArgs: false,// True if no arguments provided
   argc: 0,      // Argument count (excludes piped input)
   color: {}     // Color system API
@@ -359,38 +389,38 @@ const parseCLI = require("simpleargumentsparser");
 
 (async () => {
   const cli = await parseCLI();
-  
+
   // Help menu
   if (cli.s.h || cli.c.help) {
     showHelp(cli);
     process.exit(0);
   }
-  
+
   // Version
   if (cli.c.version) {
     console.log(cli.color.bold("v1.0.0"));
     process.exit(0);
   }
-  
+
   // Validation
   if (cli.noArgs && !cli.p) {
     console.log(cli.color.red("Error: No input provided"));
     console.log(`Use ${cli.color.cyan("--help")} for usage information`);
     process.exit(1);
   }
-  
+
   // Process piped input
   if (cli.p) {
     console.log(cli.color.blue("Processing piped input..."));
     processInput(cli.p);
   }
-  
+
   // Verbose mode
   const verbose = cli.s.v || cli.c.verbose;
   if (verbose) {
     console.log(cli.color.dim("Verbose mode enabled"));
   }
-  
+
   // Debug mode
   if (cli.c["debug-args"]) {
     console.log(cli.color.magenta("Debug: Arguments"));
@@ -451,25 +481,25 @@ const loadFile = (filename: string): string | null => {
 
 (async () => {
   const cli = await parseCLI();
-  
+
   const config: Config = {
     input: cli.c.input as string || "input.txt",
     output: cli.c.output as string || "output.txt",
     verbose: !!(cli.s.v || cli.c.verbose)
   };
-  
+
   if (config.verbose) {
     console.log(cli.color.dim(`Input: ${config.input}`));
     console.log(cli.color.dim(`Output: ${config.output}`));
   }
-  
+
   const content = loadFile(config.input);
-  
+
   if (!content) {
     console.log(cli.color.red(`Error: Cannot read ${config.input}`));
     process.exit(1);
   }
-  
+
   // Process content...
   console.log(cli.color.green("✓ Success"));
 })();
@@ -669,6 +699,173 @@ cd other_languages/bash
 
 ---
 
+## Rust Version
+
+The Rust version of simpleArgumentsParser provides a type-safe, zero-dependency argument parser with a fluent API for colors.
+
+### Installation
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+simpleargumentsparser = "2.1.0"
+```
+
+### Basic Usage
+
+```rust
+use simpleargumentsparser::parse_cli;
+use std::process;
+
+fn main() {
+    let cli = parse_cli();
+    
+    let mut verbose = false;
+    
+    if cli.no_args {
+        exit("Arguments needed");
+    }
+    
+    if cli.s.contains_key("h") || cli.c.contains_key("help") {
+        exit("Help Menu:\n\nThis is just an example");
+    }
+    
+    if cli.s.contains_key("v") || cli.c.contains_key("verbose") {
+        verbose = true;
+    }
+    
+    if cli.c.contains_key("version") {
+        exit("V0.0.1");
+    }
+    
+    if cli.s.contains_key("s") {
+        println!("Hello!");
+    }
+    
+    if let Some(p) = &cli.p {
+        println!("Hello {}", p);
+    }
+    
+    if cli.c.contains_key("debug-arguments") {
+        println!("{:#?}", cli);
+    }
+}
+
+fn exit(msg: &str) {
+    println!("{}", msg);
+    process::exit(0);
+}
+```
+
+### Color System (Builder Pattern)
+
+The Rust version features a fluent builder pattern for color styling:
+
+```rust
+use simpleargumentsparser::parse_cli;
+
+fn main() {
+    let cli = parse_cli();
+    
+    // Basic colors with direct application
+    println!("{}", cli.color.red("Error message"));
+    println!("{}", cli.color.green("Success!"));
+    println!("{}", cli.color.blue("Information"));
+    
+    // Chaining styles
+    println!("{}", cli.color.bold().red("Bold red text"));
+    println!("{}", cli.color.underline().yellow("Underlined yellow"));
+    println!("{}", cli.color.bold().italic().cyan("Bold italic cyan"));
+    
+    // Bright colors
+    println!("{}", cli.color.bright_red("Bright red"));
+    println!("{}", cli.color.bright_green("Bright green"));
+    
+    // Background colors with chaining
+    println!("{}", cli.color.bg_red().white("White text on red background"));
+    println!("{}", cli.color.bg_blue().bright_white("Bright white on blue"));
+    
+    // Using paint() for explicit styling
+    println!("{}", cli.color.bold().underline().paint("Explicitly painted text"));
+}
+```
+
+### Using the `color!` Macro
+
+For more concise color combinations, use the `color!` macro:
+
+```rust
+use simpleargumentsparser::color;
+
+fn main() {
+    // Combine multiple styles in one line
+    println!("{}", color!(bold red "Bold red text"));
+    println!("{}", color!(underline yellow "Underlined yellow"));
+    println!("{}", color!(bg_blue bright_white "White on blue background"));
+    println!("{}", color!(bold italic cyan "Bold italic cyan"));
+    println!("{}", color!(bg_red white blink "Blinking white on red"));
+}
+```
+
+### CLI Object Structure (Rust)
+
+```rust
+pub struct CLI {
+    pub s: HashMap<String, String>,      // Single-dash arguments (-v, -h)
+    pub c: HashMap<String, String>,      // Double-dash arguments (--verbose, --help)
+    pub o: Vec<(String, usize)>,         // Positional arguments with indices
+    pub p: Option<String>,               // Piped input (None if no pipe)
+    pub e: Vec<usize>,                   // Error indices
+    pub no_args: bool,                   // True if no arguments provided
+    pub argc: usize,                     // Argument count
+    pub color: Color,                    // ANSI color system with builder pattern
+}
+```
+
+### Running Examples
+
+```bash
+# Basic example with arguments
+cargo run --example basic -- -v --debug-arguments
+
+# Colored example showcase
+cargo run --example colored -- --showcase
+
+# Specific color demonstrations
+cargo run --example colored -- --colors
+cargo run --example colored -- --bright
+cargo run --example colored -- --backgrounds
+
+# The example binary
+cargo run --bin cli-example -- -h
+cargo run --bin cli-example -- --version
+```
+
+### With Piped Input
+
+```bash
+# Using echo
+echo "Hello from pipe" | cargo run --example basic
+
+# Using cat with a file
+cat Cargo.toml | cargo run --example basic -- --debug-arguments
+
+# Combined with arguments
+printf "Line 1\nLine 2" | cargo run --bin cli-example -- -v
+```
+
+### Features
+
+- **Zero Dependencies** - Pure Rust implementation
+- **Builder Pattern** - Fluent API for color styling
+- **Memory Safe** - Rust's ownership model ensures safety
+- **Macro Support** - `color!` macro for concise styling
+- **Cross-Platform** - Works on Windows, macOS, Linux
+- **Complete Color System** - 8 standard colors, 8 bright variants, backgrounds, and styles
+- **Piped Input Support** - Automatic detection of stdin input
+
+---
 
 ## Contributing
 
@@ -688,4 +885,5 @@ Found a bug or have a feature request? Please open an issue on GitHub with:
 
 - 📖 **Documentation**: See examples above
 - 🐛 **Issues**: [GitHub Issues](https://github.com/stringmanolo/simpleargumentsparser/issues)
-
+- 📦 **npm Package**: [simpleargumentsparser on npm](https://www.npmjs.com/package/simpleargumentsparser)
+- 📦 **Crate**: [simpleargumentsparser on crates.io](https://crates.io/crates/simpleargumentsparser)

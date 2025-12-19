@@ -69,9 +69,7 @@ npm install simpleargumentsparser
 ### Rust
 
 ```toml
-# In your Cargo.toml
-[dependencies]
-simpleargumentsparser = "2.1.0"
+cargo add simpleargumentsparser
 ```
 
 ### Bash

@@ -2,11 +2,8 @@
 
 ## Installation
 
-Add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-simpleargumentsparser = "2.1.0"
+```bash
+cargo add simpleargumentsparser
 ```
 
 ## Quick Start

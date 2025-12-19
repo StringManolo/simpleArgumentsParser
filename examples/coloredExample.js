@@ -1,4 +1,4 @@
-const parseCLI = require("../");
+import parseCLI from "simpleargumentsparser";
 
 (async() => {
   const cli = await parseCLI();

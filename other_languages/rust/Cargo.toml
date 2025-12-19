@@ -1,0 +1,29 @@
+[package]
+name = "simpleargumentsparser"
+version = "2.1.0"
+edition = "2024"
+description = "A simple command line argument parser with colors"
+authors = ["StringManolo <stringmanolo@gmail.com>"]
+license = "Apache-3.0"
+readme = "README.md"
+repository = "https://github.com/stringmanolo/simpleargumentsparser"
+keywords = ["cli", "arguments", "parser", "colors"]
+categories = ["command-line-interface"]
+
+[dependencies]
+
+[lib]
+name = "simpleargumentsparser"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cli-example"
+path = "src/bin/example.rs"
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[example]]
+name = "colored"
+path = "examples/colored.rs"

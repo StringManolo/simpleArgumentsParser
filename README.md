@@ -1,6 +1,6 @@
 # simpleArgumentsParser
 
-> A lightweight, powerful CLI argument parser for Node.js, Bash, and Rust with built-in ANSI color support
+> A lightweight, powerful CLI argument parser for Node.js, Bash, Rust, and C++ with built-in ANSI color support
 
 [![npm version](https://img.shields.io/npm/v/simpleargumentsparser.svg)](https://www.npmjs.com/package/simpleargumentsparser)
 [![crates.io](https://img.shields.io/crates/v/simpleargumentsparser.svg)](https://crates.io/crates/simpleargumentsparser)
@@ -20,6 +20,7 @@
 - [Examples](#examples)
 - [Bash Version](#bash-version)
 - [Rust Version](#rust-version)
+- [C++ Version](#c-version)
 - [License](#license)
 
 ---
@@ -33,7 +34,7 @@
 - **🚀 Fast & Lightweight** - Zero dependencies, minimal overhead
 - **🎨 Built-in Colors** - ANSI color system with chainable styles
 - **🔄 Pipe Support** - Handle piped input seamlessly
-- **📦 Multi-Language** - Available for Node.js (JS/TS), Rust, and Bash
+- **📦 Multi-Language** - Available for Node.js (JS/TS), Rust, C++, and Bash
 - **🎯 Simple API** - Intuitive syntax, minimal learning curve
 - **⚡ TypeScript Ready** - Full TypeScript support with type definitions
 
@@ -54,7 +55,7 @@
 - 8 standard colors + 8 bright variants
 - Background colors
 - Chainable style combinations
-- Works in Node.js, Rust, and Bash
+- Works in Node.js, Rust, C++, and Bash
 
 ---
 
@@ -70,6 +71,13 @@ npm install simpleargumentsparser
 
 ```toml
 cargo add simpleargumentsparser
+```
+
+### C++
+
+```bash
+# Copy the single header file
+cp other_languages/cpp/simpleargumentsparser.hpp /your/project/include/
 ```
 
 ### Bash
@@ -130,6 +138,24 @@ fn main() {
 fn exit(msg: &str) {
     println!("{}", msg);
     process::exit(0);
+}
+```
+
+### C++
+
+```cpp
+#include "simpleargumentsparser.hpp"
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+  CLI cli = parseCLI(argc, argv);
+
+  if (cli.s["h"] || cli.c["help"]) {
+    std::cout << cli.color["bold"]["cyan"]("My C++ Tool") << " v1.0.0" << std::endl;
+    return 0;
+  }
+
+  return 0;
 }
 ```
 
@@ -718,33 +744,33 @@ use std::process;
 
 fn main() {
     let cli = parse_cli();
-    
+
     let mut verbose = false;
-    
+
     if cli.no_args {
         exit("Arguments needed");
     }
-    
+
     if cli.s.contains_key("h") || cli.c.contains_key("help") {
         exit("Help Menu:\n\nThis is just an example");
     }
-    
+
     if cli.s.contains_key("v") || cli.c.contains_key("verbose") {
         verbose = true;
     }
-    
+
     if cli.c.contains_key("version") {
         exit("V0.0.1");
     }
-    
+
     if cli.s.contains_key("s") {
         println!("Hello!");
     }
-    
+
     if let Some(p) = &cli.p {
         println!("Hello {}", p);
     }
-    
+
     if cli.c.contains_key("debug-arguments") {
         println!("{:#?}", cli);
     }
@@ -765,25 +791,25 @@ use simpleargumentsparser::parse_cli;
 
 fn main() {
     let cli = parse_cli();
-    
+
     // Basic colors with direct application
     println!("{}", cli.color.red("Error message"));
     println!("{}", cli.color.green("Success!"));
     println!("{}", cli.color.blue("Information"));
-    
+
     // Chaining styles
     println!("{}", cli.color.bold().red("Bold red text"));
     println!("{}", cli.color.underline().yellow("Underlined yellow"));
     println!("{}", cli.color.bold().italic().cyan("Bold italic cyan"));
-    
+
     // Bright colors
     println!("{}", cli.color.bright_red("Bright red"));
     println!("{}", cli.color.bright_green("Bright green"));
-    
+
     // Background colors with chaining
     println!("{}", cli.color.bg_red().white("White text on red background"));
     println!("{}", cli.color.bg_blue().bright_white("Bright white on blue"));
-    
+
     // Using paint() for explicit styling
     println!("{}", cli.color.bold().underline().paint("Explicitly painted text"));
 }
@@ -862,6 +888,205 @@ printf "Line 1\nLine 2" | cargo run --bin cli-example -- -v
 - **Cross-Platform** - Works on Windows, macOS, Linux
 - **Complete Color System** - 8 standard colors, 8 bright variants, backgrounds, and styles
 - **Piped Input Support** - Automatic detection of stdin input
+
+---
+
+## C++ Version
+
+The C++ version of simpleArgumentsParser is a single-header library providing a lightweight, zero-dependency CLI argument parser with full ANSI color support. Designed for C++17 and above, it offers a similar API to the JavaScript and Rust versions with C++ idioms.
+
+### Installation
+
+Simply copy the header file to your project:
+
+```bash
+# Copy the single header file
+cp other_languages/cpp/simpleargumentsparser.hpp /your/project/include/
+```
+
+Or include it directly:
+
+```cpp
+#include "simpleargumentsparser.hpp"
+```
+
+No build system configuration required - it's header-only!
+
+### Basic Usage
+
+```cpp
+#include "simpleargumentsparser.hpp"
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+  CLI cli = parseCLI(argc, argv);
+
+  // Check for help flag using JSValue's implicit bool conversion
+  if (cli.s["h"] || cli.c["help"]) {
+    std::cout << cli.color["bold"]["cyan"]("My C++ Tool") << " v1.0.0" << std::endl;
+    return 0;
+  }
+
+  // Verbose mode
+  if (cli.s["v"] || cli.c["verbose"]) {
+    std::cout << cli.color["dim"]("Verbose mode enabled") << std::endl;
+  }
+
+  // Piped input
+  if (!cli.p.empty()) {
+    std::cout << "Hello " << cli.color["blue"](cli.p) << std::endl;
+  }
+
+  return 0;
+}
+```
+
+### Color System
+
+The C++ version uses bracket notation for color access:
+
+```cpp
+// Basic colors
+std::cout << cli.color["red"]("Error message") << std::endl;
+std::cout << cli.color["green"]("Success!") << std::endl;
+
+// Text styles
+std::cout << cli.color["bold"]("Bold text") << std::endl;
+std::cout << cli.color["underline"]("Underlined text") << std::endl;
+
+// Chained styles with bracket notation
+std::cout << cli.color["bold"]["red"]("Bold red text") << std::endl;
+std::cout << cli.color["underline"]["yellow"]("Underlined yellow") << std::endl;
+
+// Bright colors
+std::cout << cli.color["brightRed"]("Bright red") << std::endl;
+std::cout << cli.color["brightGreen"]("Bright green") << std::endl;
+
+// Background colors
+std::cout << cli.color["bgRed"]["white"]("White on red") << std::endl;
+std::cout << cli.color["bgBlue"]["white"]("White on blue") << std::endl;
+```
+
+### Complete Example
+
+```cpp
+#include "simpleargumentsparser.hpp"
+#include <iostream>
+#include <cstdlib>
+
+void exit(const std::string& msg) {
+  std::cout << msg << std::endl;
+  std::exit(0);
+}
+
+int main(int argc, char* argv[]) {
+  CLI cli = parseCLI(argc, argv);
+
+  bool verbose = false;
+
+  if (cli.noArgs)                  exit("Arguments needed");
+  if (cli.s["h"] || cli.c["help"]) exit("Help Menu:\n\nThis is just an example");
+  if (cli.s["v"] || cli.c["verbose"]) verbose = true;
+  if (cli.c["version"])            exit("V0.0.1");
+  if (cli.s["s"])                  std::cout << "Hello!" << std::endl;
+  if (!cli.p.empty())              std::cout << "Hello " << cli.p << std::endl;
+
+  if (cli.c["debug-arguments"]) {
+    std::string json = cli.toJSON(4, true);  // indent=4, tryUseJQ=true
+    if (!json.empty()) {
+      std::cout << json << std::endl;
+    }
+  }
+
+  return 0;
+}
+```
+
+### Color Showcase Example
+
+```cpp
+#include "simpleargumentsparser.hpp"
+#include <iostream>
+#include <sstream>
+
+using namespace std;
+
+void showColorShowcase(const CLI& cli) {
+    cout << "\n" << cli.color["bold"]["brightCyan"]("CLI COLOR SYSTEM SHOWCASE") << "\n\n";
+    
+    // Text styles
+    cout << cli.color["bold"]("Bold text") << "\n";
+    cout << cli.color["italic"]("Italic text") << "\n";
+    cout << cli.color["underline"]("Underlined text") << "\n\n";
+    
+    // Standard colors
+    cout << cli.color["red"]("Red") << " ";
+    cout << cli.color["green"]("Green") << " ";
+    cout << cli.color["yellow"]("Yellow") << " ";
+    cout << cli.color["blue"]("Blue") << "\n\n";
+    
+    // Chained combinations
+    cout << cli.color["bold"]["red"]("Bold Red") << "\n";
+    cout << cli.color["underline"]["green"]("Underlined Green") << "\n";
+    cout << cli.color["italic"]["blue"]("Italic Blue") << "\n";
+    
+    // Background combinations
+    cout << cli.color["bgRed"]["white"]("White on Red") << "\n";
+    cout << cli.color["bgGreen"]["black"]("Black on Green") << "\n";
+}
+
+int main(int argc, char* argv[]) {
+    CLI cli = parseCLI(argc, argv);
+    
+    if (cli.c["showcase"]) {
+        showColorShowcase(cli);
+    }
+    
+    return 0;
+}
+```
+
+### Features
+
+- **Single-header library** - Just include `simpleargumentsparser.hpp`
+- **Zero dependencies** - Only uses standard C++17 library
+- **Type-safe API** - Uses `std::variant` and `JSValue` wrapper
+- **Full ANSI color system** - Bracket notation for colors (`["color"]["style"]`)
+- **Cross-platform** - Works on Windows, macOS, and Linux
+- **Automatic pipe detection** - Captures piped input automatically
+- **JSON output** - Built-in JSON serialization with jq support
+- **Debug utilities** - Built-in debugging and visualization
+
+### Compilation
+
+Compile with C++17 or later:
+
+```bash
+# Basic compilation
+g++ -std=c++17 -o myapp myapp.cpp
+
+# With optimizations
+g++ -std=c++17 -O2 -o myapp myapp.cpp
+```
+
+### Running Examples
+
+```bash
+# Build the examples
+g++ -std=c++17 -o example example.cpp
+g++ -std=c++17 -o coloredExample coloredExample.cpp
+
+# Run basic example
+./example -h
+./example -v --debug-arguments
+
+# Run color showcase
+./coloredExample --showcase
+./coloredExample --colors --bright
+
+# With piped input
+echo "Hello from pipe" | ./example
+```
 
 ---
 

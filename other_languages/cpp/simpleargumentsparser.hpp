@@ -553,7 +553,7 @@ class CLI {
       }
     };
 
-    CLI parseCLI(int argc, char* argv[]) {
+    inline CLI parseCLI(int argc, char* argv[]) {
       return CLI::parse(argc, argv);
     }
 
